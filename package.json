@@ -9,10 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.16.0",
+    "@headlessui/react": "^2.2.2",
+    "@heroicons/react": "^2.2.0",
+    "@prisma/client": "^6.6.0",
     "framer-motion": "^12.7.4",
     "next": "15.3.1",
+    "prisma": "^6.6.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
+    "svix": "^1.64.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
