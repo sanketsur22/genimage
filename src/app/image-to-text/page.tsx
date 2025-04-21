@@ -13,7 +13,7 @@ interface Message {
 
 export default function ImageToTextPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
+  // const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleNewChat = () => {

@@ -58,6 +58,7 @@ export default function TextToImagePage() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      console.error("Error generating image:", error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content:

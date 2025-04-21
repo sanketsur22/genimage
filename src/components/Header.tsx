@@ -6,7 +6,7 @@ import { Fragment } from "react";
 import { ChevronDownIcon, SparklesIcon } from "@heroicons/react/24/solid";
 
 // Example model lists - you'll want to fetch these from your backend
-const textToImageModels = ["Stable Diffusion", "DALL-E 2", "Midjourney"];
+// const textToImageModels = ["Stable Diffusion", "DALL-E 2", "Midjourney"];
 const imageToTextModels = ["GPT-4 Vision", "CogVLM", "LLaVA"];
 
 export default function Header() {
