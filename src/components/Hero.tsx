@@ -8,7 +8,7 @@ export default function Hero() {
 
   const handleNavigate = (mode: "text-to-image" | "image-to-text") => {
     if (mode === "text-to-image") {
-      router.push("/chat");
+      router.push("/text-to-image");
     } else {
       router.push("/image-to-text");
     }

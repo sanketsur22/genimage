@@ -1,6 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useRef } from "react";
 import ChatSidebar from "@/components/ChatSidebar";
 
 interface Message {
@@ -8,77 +7,91 @@ interface Message {
   content: string;
   sender: "user" | "assistant";
   timestamp: Date;
+  imageUrl?: string;
 }
 
-export default function ChatPage() {
-  const searchParams = useSearchParams();
-  const mode = searchParams.get("mode") || "text-to-image";
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+export default function TextToImagePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const handleNewChat = () => {
+    setMessages([]);
+    setInputMessage("");
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const handleGenerateImage = async () => {
+    if (!inputMessage.trim() || isGenerating) return;
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
       sender: "user",
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
+    setIsGenerating(true);
 
-    // Simulate assistant response
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: inputMessage }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error);
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "This is a sample response from the assistant.",
+        content: "Here's your generated image:",
+        sender: "assistant",
+        timestamp: new Date(),
+        imageUrl: data.imageUrl,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content:
+          "Sorry, there was an error generating your image. Please try again.",
         sender: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleGenerateImage();
     }
-  };
-
-  const handleNewChat = () => {
-    setSelectedChat(null);
-    setMessages([]);
   };
 
   return (
     <div className="flex h-[calc(100vh-4rem)] mt-16 bg-gradient-to-br from-indigo-500 to-purple-600">
-      <ChatSidebar mode={mode} onNewChat={handleNewChat} />
+      <ChatSidebar mode="text-to-image" onNewChat={handleNewChat} />
 
       {/* Decorative elements */}
       <div className="absolute top-20 right-10 w-20 h-20 bg-gradient-to-br from-pink-400 to-red-500 rounded-full blur-xl opacity-30" />
       <div className="absolute bottom-20 left-10 w-32 h-32 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-full blur-xl opacity-20" />
 
-      {/* Main chat area */}
+      {/* Main area */}
       <div className="flex-1 flex flex-col h-full backdrop-blur-sm bg-white/10 rounded-l-2xl">
         <div className="flex-1 overflow-y-auto p-4">
           {messages.length === 0 && (
             <div className="text-center text-white/80 mt-10">
-              {mode === "text-to-image"
-                ? "Describe the image you want to generate..."
-                : "Upload an image or paste its URL to extract text..."}
+              Describe the image you want to generate...
             </div>
           )}
           <div className="space-y-4">
@@ -96,44 +109,39 @@ export default function ChatPage() {
                       : "bg-white/20 text-white backdrop-blur-sm border border-white/10"
                   }`}
                 >
-                  {message.content}
+                  <p className="mb-2">{message.content}</p>
+                  {message.imageUrl && (
+                    <img
+                      src={message.imageUrl}
+                      alt="Generated"
+                      className="max-w-full rounded-lg border border-white/20"
+                    />
+                  )}
                 </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
         </div>
-        {/* Message input */}
+
+        {/* Input area */}
         <div className="border-t border-white/20 p-4 backdrop-blur-md bg-white/5">
           <div className="flex gap-2">
-            {mode === "image-to-text" && (
-              <button
-                className="bg-purple-700 text-white px-4 py-2 rounded-xl font-semibold hover:bg-purple-800 transition-all border border-white/20 transform hover:scale-105"
-                onClick={() => {
-                  /* TODO: Implement image upload */
-                }}
-              >
-                Upload Image
-              </button>
-            )}
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder={
-                mode === "text-to-image"
-                  ? "Describe the image you want to generate..."
-                  : "Paste image URL or type a message..."
-              }
+              placeholder="Describe the image you want to generate..."
               className="flex-1 rounded-xl border border-white/20 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 bg-white/10 text-white placeholder-white/70"
+              disabled={isGenerating}
             />
             <button
-              onClick={handleSendMessage}
+              onClick={handleGenerateImage}
               className="bg-white text-purple-600 px-6 py-2 rounded-xl font-semibold hover:bg-opacity-90 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              disabled={!inputMessage.trim()}
+              disabled={!inputMessage.trim() || isGenerating}
             >
-              Send
+              {isGenerating ? "Generating..." : "Generate"}
             </button>
           </div>
         </div>
