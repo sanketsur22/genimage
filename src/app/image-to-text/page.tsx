@@ -1,7 +1,19 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import { useRouter } from "next/navigation";
 import ChatSidebar from "@/components/ChatSidebar";
+
+const TEXT_TO_IMAGE_MODELS = [
+  { id: "gemini-2", name: "Gemini 2.0" },
+  { id: "stable-diffusion", name: "Stable Diffusion" },
+  { id: "dall-e-3", name: "DALL-E 3" },
+];
+
+const IMAGE_TO_TEXT_MODELS = [
+  { id: "gemini-vision", name: "Gemini Vision" },
+  { id: "gpt-4-vision", name: "GPT-4 Vision" },
+];
 
 interface Message {
   id: string;
@@ -12,9 +24,36 @@ interface Message {
 }
 
 export default function ImageToTextPage() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
-  // const [inputMessage, setInputMessage] = useState("");
+  const [showHistory, setShowHistory] = useState(false);
+  const [mode, setMode] = useState<"text-to-image" | "image-to-text">(
+    "image-to-text"
+  );
+  const [selectedModel, setSelectedModel] = useState(
+    IMAGE_TO_TEXT_MODELS[0].id
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Add model options based on selected mode
+  const modelOptions =
+    mode === "text-to-image" ? TEXT_TO_IMAGE_MODELS : IMAGE_TO_TEXT_MODELS;
+
+  // Update selected model when mode changes
+  useEffect(() => {
+    setSelectedModel(
+      mode === "text-to-image"
+        ? TEXT_TO_IMAGE_MODELS[0].id
+        : IMAGE_TO_TEXT_MODELS[0].id
+    );
+  }, [mode]);
+
+  // Add navigation when mode changes
+  useEffect(() => {
+    if (mode === "text-to-image") {
+      router.push("/text-to-image");
+    }
+  }, [mode, router]);
 
   const handleNewChat = () => {
     setMessages([]);
@@ -23,6 +62,20 @@ export default function ImageToTextPage() {
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
+
+      // Check if selected model is Gemini Vision
+      if (selectedModel !== "gemini-vision") {
+        const comingSoonMessage: Message = {
+          id: Date.now().toString(),
+          content:
+            "This feature is coming soon! Currently, only Gemini Vision is supported.",
+          sender: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, comingSoonMessage]);
+        return;
+      }
+
       const newMessage: Message = {
         id: Date.now().toString(),
         content: `Processing image: ${file.name}`,
@@ -56,7 +109,12 @@ export default function ImageToTextPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] mt-16 bg-gradient-to-br from-indigo-500 to-purple-600">
-      <ChatSidebar mode="image-to-text" onNewChat={handleNewChat} />
+      <ChatSidebar
+        mode="image-to-text"
+        onNewChat={handleNewChat}
+        onToggleHistory={() => setShowHistory(!showHistory)}
+        showHistory={showHistory}
+      />
 
       {/* Decorative elements */}
       <div className="absolute top-20 right-10 w-20 h-20 bg-gradient-to-br from-pink-400 to-red-500 rounded-full blur-xl opacity-30" />
@@ -118,11 +176,36 @@ export default function ImageToTextPage() {
           )}
         </div>
         {/* Upload button area */}
-        <div className="border-t border-white/20 p-4 backdrop-blur-md bg-white/5">
+        <div className="border-t border-white/20 p-4 backdrop-blur-md bg-white/5 overflow-hidden">
+          <div className="flex gap-4 mb-4">
+            <select
+              value={mode}
+              onChange={(e) =>
+                setMode(e.target.value as "text-to-image" | "image-to-text")
+              }
+              className="bg-white/10 text-white border border-white/20 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <option value="text-to-image">Text to Image</option>
+              <option value="image-to-text">Image to Text</option>
+            </select>
+
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="bg-white/10 text-white border border-white/20 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              {modelOptions.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex gap-2">
             <div {...getRootProps()} className="flex-1">
               <input {...getInputProps()} />
-              <button className="w-full bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-opacity-90 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+              <button className="w-full bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-opacity-90 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
