@@ -1,7 +1,7 @@
 import ChatHistory from "./ChatHistory";
 
 interface ChatSidebarProps {
-  mode: string;
+  mode: "text-to-image" | "image-to-text";
   onNewChat: () => void;
   onToggleHistory: () => void;
   showHistory: boolean;

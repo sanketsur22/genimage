@@ -44,13 +44,13 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" className="py-16 bg-gradient-to-br from-indigo-500 to-purple-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
             Simple, Transparent Pricing
           </h2>
-          <p className="mt-4 text-xl text-gray-600">
+          <p className="mt-4 text-xl text-purple-100/80">
             Choose the perfect plan for your needs
           </p>
         </div>
@@ -59,29 +59,30 @@ const Pricing = () => {
           {tiers.map((tier) => (
             <div
               key={tier.name}
-              className={`relative rounded-2xl shadow-xl p-8 ${
+              className={`relative rounded-2xl p-8 transform transition-all duration-300 hover:scale-105 ${
                 tier.highlighted
-                  ? "ring-2 ring-indigo-600 scale-105 bg-white"
-                  : "bg-white"
+                  ? "bg-gradient-to-b from-purple-900/70 to-purple-800/60 ring-1 ring-purple-400/30 scale-105 backdrop-blur-sm shadow-xl"
+                  : "bg-gradient-to-b from-purple-950/50 to-purple-900/40 backdrop-blur-sm hover:from-purple-900/60 hover:to-purple-800/50 shadow-lg"
               }`}
             >
-              <div className="flex flex-col h-full">
-                <h3 className="text-xl font-semibold text-gray-900">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-purple-400/5 to-transparent"></div>
+              <div className="relative flex flex-col h-full">
+                <h3 className="text-xl font-semibold text-purple-100">
                   {tier.name}
                 </h3>
                 <p className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-bold tracking-tight text-gray-900">
+                  <span className="text-5xl font-bold tracking-tight text-white">
                     ${tier.price}
                   </span>
-                  <span className="ml-1 text-sm font-semibold text-gray-500">
+                  <span className="ml-1 text-sm font-semibold text-purple-200/80">
                     /month
                   </span>
                 </p>
-                <ul className="mt-6 space-y-4 flex-1">
+                <ul className="mt-8 space-y-4 flex-1">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-start">
                       <svg
-                        className="h-6 w-6 text-green-500 flex-shrink-0"
+                        className="h-6 w-6 text-purple-300 flex-shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -93,17 +94,17 @@ const Pricing = () => {
                           d="M5 13l4 4L19 7"
                         />
                       </svg>
-                      <span className="ml-3 text-base text-gray-700">
+                      <span className="ml-3 text-base text-purple-100/90">
                         {feature}
                       </span>
                     </li>
                   ))}
                 </ul>
                 <button
-                  className={`mt-8 w-full rounded-md px-4 py-2 text-sm font-semibold shadow-sm ${
+                  className={`mt-8 w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-all duration-300 ${
                     tier.highlighted
-                      ? "bg-indigo-600 text-white hover:bg-indigo-500"
-                      : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                      ? "bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:from-purple-500 hover:to-purple-600 transform hover:-translate-y-1"
+                      : "bg-purple-800/40 text-purple-100 hover:bg-purple-700/50 backdrop-blur-sm transform hover:-translate-y-1"
                   }`}
                 >
                   {tier.buttonText}
