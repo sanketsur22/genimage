@@ -2,9 +2,11 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { SignInButton, useAuth } from "@clerk/nextjs";
 
 export default function Hero() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
 
   const handleNavigate = (mode: "text-to-image" | "image-to-text") => {
     if (mode === "text-to-image") {
@@ -14,8 +16,36 @@ export default function Hero() {
     }
   };
 
+  const renderButton = (mode: "text-to-image" | "image-to-text") => {
+    const buttonProps =
+      mode === "text-to-image"
+        ? {
+            className:
+              "bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all transform hover:scale-105",
+            children: "Text to Image",
+          }
+        : {
+            className:
+              "bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold hover:bg-purple-800 transition-all border border-white/20 transform hover:scale-105",
+            children: "Image to Text",
+          };
+
+    if (!isSignedIn) {
+      return (
+        <SignInButton mode="modal">
+          <button {...buttonProps} />
+        </SignInButton>
+      );
+    }
+
+    return <button {...buttonProps} onClick={() => handleNavigate(mode)} />;
+  };
+
   return (
-    <section className="relative h-screen w-full bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden">
+    <section
+      id="hero"
+      className="relative h-screen w-full bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden"
+    >
       {/* Decorative floating elements */}
       <motion.div
         animate={{
@@ -73,18 +103,8 @@ export default function Hero() {
               images or extract text from images with just a click.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => handleNavigate("text-to-image")}
-                className="bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all transform hover:scale-105"
-              >
-                Text to Image
-              </button>
-              <button
-                onClick={() => handleNavigate("image-to-text")}
-                className="bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold hover:bg-purple-800 transition-all border border-white/20 transform hover:scale-105"
-              >
-                Image to Text
-              </button>
+              {renderButton("text-to-image")}
+              {renderButton("image-to-text")}
             </div>
           </motion.div>
 
